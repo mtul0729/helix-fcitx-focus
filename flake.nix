@@ -31,6 +31,10 @@
           };
         in
         {
+          formatter = pkgs.nixfmt-tree;
+
+          packages.default = pkgs.callPackage ./nix/package.nix { };
+
           devShells.default = pkgs.mkShell {
             packages = [
               rustToolchain
@@ -40,5 +44,7 @@
             ];
           };
         };
+
+      flake.homeManagerModules.default = import ./nix/home-manager.nix;
     };
 }
