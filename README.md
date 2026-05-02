@@ -14,9 +14,9 @@ were using before leaving insert mode.
   `focus-gained-event?` and `focus-lost-event?`.
 - fcitx5 running on the user session bus.
 
-## Install
+## Install with Forge
 
-Install with Forge:
+Install the plugin with Forge:
 
 ```sh
 forge pkg install --git https://github.com/mtul0729/helix-fcitx-focus
@@ -27,6 +27,37 @@ Then load the plugin from `~/.config/helix/init.scm`:
 ```scheme
 (require "helix-fcitx-focus/cogs/fcitx-focus.scm")
 ```
+
+## NixOS / Home Manager
+
+This repository also exposes a flake package and Home Manager module for
+declarative installations:
+
+```nix
+{
+  inputs.helix-fcitx-focus.url = "github:mtul0729/helix-fcitx-focus";
+
+  outputs =
+    { helix-fcitx-focus, ... }:
+    {
+      # In a Home Manager module:
+      home-manager.users.example =
+        { pkgs, ... }:
+        {
+          imports = [
+            helix-fcitx-focus.homeManagerModules.default
+          ];
+
+          programs.helix.plugins.helix-fcitx-focus = {
+            package = helix-fcitx-focus.packages.${pkgs.stdenv.hostPlatform.system}.default;
+            dylibs = [ "libhelix_fcitx_focus.so" ];
+          };
+        };
+    };
+}
+```
+
+## Development
 
 For local development from this repository:
 
