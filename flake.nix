@@ -5,7 +5,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
-    steel.url = "git+https://github.com/mattwparas/steel.git";
+    steel.url = "github:mattwparas/steel";
     systems.url = "github:nix-systems/default";
   };
 

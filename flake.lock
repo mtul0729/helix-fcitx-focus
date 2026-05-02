@@ -155,15 +155,15 @@
       "locked": {
         "lastModified": 1775533673,
         "narHash": "sha256-lqtx1q/AHntbZvF3rpWbicvxE3NGZU+VPMueECaVdSA=",
-        "ref": "refs/heads/master",
+        "owner": "mattwparas",
+        "repo": "steel",
         "rev": "605d490c07ae6937d532d5a994920b4dab3016ad",
-        "revCount": 1177,
-        "type": "git",
-        "url": "https://github.com/mattwparas/steel.git"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://github.com/mattwparas/steel.git"
+        "owner": "mattwparas",
+        "repo": "steel",
+        "type": "github"
       }
     },
     "systems": {
