@@ -59,3 +59,8 @@ events to four small operations: save, close, save-and-close, and restore.
 This plugin is intended as a real-world example for Steel terminal focus events:
 terminal focus events complement `on-mode-switch`, because changing windows does
 not necessarily change Helix's editor mode.
+
+## License
+
+Licensed under either of Apache License, Version 2.0 or MIT license at your
+option.
