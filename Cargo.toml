@@ -1,0 +1,16 @@
+[package]
+name = "helix-fcitx-focus"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/mtul0729/helix-fcitx-focus"
+description = "Steel native module for Helix fcitx5 focus and mode switching"
+
+[lib]
+name = "helix_fcitx_focus"
+crate-type = ["cdylib"]
+
+[dependencies]
+abi_stable = "0.11.2"
+steel-core = { git = "https://github.com/mattwparas/steel.git", features = ["dylibs", "sync"] }
+zbus = { version = "5", features = ["blocking-api"] }
