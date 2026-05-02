@@ -10,8 +10,6 @@ were using before leaving insert mode.
 ## Requirements
 
 - Helix built with Steel support from the `steel-event-system` branch.
-- Steel focus event predicates from https://github.com/mattwparas/helix/pull/111:
-  `focus-gained-event?` and `focus-lost-event?`.
 - fcitx5 running on the user session bus.
 
 ## Install with Forge
