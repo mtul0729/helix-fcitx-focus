@@ -1,12 +1,25 @@
-{ config, lib, ... }:
+{ self }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.programs.helix;
+  defaultPackage = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   pluginType =
     { name, ... }:
     {
       options = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Whether to install this Helix Steel plugin.";
+        };
+
         package = lib.mkOption {
           type = lib.types.package;
           description = ''
@@ -38,19 +51,21 @@ let
       };
     };
 
+  enabledPlugins = lib.filterAttrs (_: plugin: plugin.enable) cfg.plugins;
+
   pluginFiles = lib.mapAttrs' (
     name: plugin:
     lib.nameValuePair "helix/${plugin.helixConfigPath}" {
       source = "${plugin.package}/${plugin.cogsPath}";
     }
-  ) cfg.plugins;
+  ) enabledPlugins;
 
   dylibFiles = lib.concatMapAttrs (
     _: plugin:
     lib.genAttrs plugin.dylibs (dylib: {
       source = "${plugin.package}/lib/${dylib}";
     })
-  ) cfg.plugins;
+  ) enabledPlugins;
 in
 {
   options.programs.helix = {
@@ -67,11 +82,19 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.plugins != { }) {
-    xdg.configFile = pluginFiles;
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.plugins.helix-fcitx-focus.enable or false) {
+      programs.helix.plugins.helix-fcitx-focus = {
+        package = lib.mkDefault defaultPackage;
+        dylibs = lib.mkDefault [ "libhelix_fcitx_focus.so" ];
+      };
+    })
+    (lib.mkIf (enabledPlugins != { }) {
+      xdg.configFile = pluginFiles;
 
-    xdg.dataFile = lib.mapAttrs' (
-      dylib: file: lib.nameValuePair "steel/native/${dylib}" file
-    ) dylibFiles;
-  };
+      xdg.dataFile = lib.mapAttrs' (
+        dylib: file: lib.nameValuePair "steel/native/${dylib}" file
+      ) dylibFiles;
+    })
+  ];
 }

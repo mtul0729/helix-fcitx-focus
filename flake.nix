@@ -45,6 +45,8 @@
           };
         };
 
-      flake.homeManagerModules.default = import ./nix/home-manager.nix;
+      flake.homeManagerModules.default = import ./nix/home-manager.nix {
+        self = inputs.self;
+      };
     };
 }

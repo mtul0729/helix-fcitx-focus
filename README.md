@@ -48,10 +48,11 @@ declarative installations:
             helix-fcitx-focus.homeManagerModules.default
           ];
 
-          programs.helix.plugins.helix-fcitx-focus = {
-            package = helix-fcitx-focus.packages.${pkgs.stdenv.hostPlatform.system}.default;
-            dylibs = [ "libhelix_fcitx_focus.so" ];
-          };
+          programs.helix.plugins.helix-fcitx-focus.enable = true;
+
+          xdg.configFile."helix/init.scm".text = ''
+            (require "helix-fcitx-focus/cogs/fcitx-focus.scm")
+          '';
         };
     };
 }
