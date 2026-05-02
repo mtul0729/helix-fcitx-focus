@@ -16,28 +16,26 @@ were using before leaving insert mode.
 
 ## Install
 
-Build and install the native Steel module:
+Install with Forge:
 
 ```sh
-nix develop
-cargo steel-lib
-```
-
-Copy the Scheme plugin into your Helix cogs directory:
-
-```sh
-mkdir -p ~/.config/helix/cogs
-cp cogs/fcitx-focus.scm ~/.config/helix/cogs/
+forge pkg install --git https://github.com/mtul0729/helix-fcitx-focus
 ```
 
 Then load the plugin from `~/.config/helix/init.scm`:
 
 ```scheme
-(require "cogs/fcitx-focus.scm")
+(require "helix-fcitx-focus/cogs/fcitx-focus.scm")
 ```
 
-The repository also includes `cog.scm` metadata for future Steel/Forge package
-experiments, but the copy-based install above is the tested path for now.
+For local development from this repository:
+
+```sh
+nix develop
+cargo steel-lib
+mkdir -p ~/.local/share/steel/cogs/helix-fcitx-focus/cogs
+cp cogs/fcitx-focus.scm ~/.local/share/steel/cogs/helix-fcitx-focus/cogs/
+```
 
 ## Behavior
 
