@@ -21,7 +21,9 @@ let
         };
 
         package = lib.mkOption {
-          type = lib.types.package;
+          type = lib.types.nullOr lib.types.package;
+          default = if name == "helix-fcitx-focus" then defaultPackage else null;
+          defaultText = lib.literalExpression "null";
           description = ''
             Package containing the Steel plugin files.
 
@@ -44,7 +46,7 @@ let
 
         dylibs = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = [ ];
+          default = if name == "helix-fcitx-focus" then [ "libhelix_fcitx_focus.so" ] else [ ];
           example = [ "libhelix_fcitx_focus.so" ];
           description = "Native Steel libraries from the package lib directory to install.";
         };
@@ -52,20 +54,24 @@ let
     };
 
   enabledPlugins = lib.filterAttrs (_: plugin: plugin.enable) cfg.plugins;
+  installablePlugins = lib.filterAttrs (_: plugin: plugin.package != null) enabledPlugins;
+  missingPackagePlugins = lib.attrNames (
+    lib.filterAttrs (_: plugin: plugin.package == null) enabledPlugins
+  );
 
   pluginFiles = lib.mapAttrs' (
     name: plugin:
     lib.nameValuePair "helix/${plugin.helixConfigPath}" {
       source = "${plugin.package}/${plugin.cogsPath}";
     }
-  ) enabledPlugins;
+  ) installablePlugins;
 
   dylibFiles = lib.concatMapAttrs (
     _: plugin:
     lib.genAttrs plugin.dylibs (dylib: {
       source = "${plugin.package}/lib/${dylib}";
     })
-  ) enabledPlugins;
+  ) installablePlugins;
 in
 {
   options.programs.helix = {
@@ -82,19 +88,18 @@ in
     };
   };
 
-  config = lib.mkMerge [
-    (lib.mkIf (cfg.plugins.helix-fcitx-focus.enable or false) {
-      programs.helix.plugins.helix-fcitx-focus = {
-        package = lib.mkDefault defaultPackage;
-        dylibs = lib.mkDefault [ "libhelix_fcitx_focus.so" ];
-      };
-    })
-    (lib.mkIf (enabledPlugins != { }) {
-      xdg.configFile = pluginFiles;
+  config = lib.mkIf (enabledPlugins != { }) {
+    assertions = [
+      {
+        assertion = missingPackagePlugins == [ ];
+        message = "Helix Steel plugins need a package: ${lib.concatStringsSep ", " missingPackagePlugins}";
+      }
+    ];
 
-      xdg.dataFile = lib.mapAttrs' (
-        dylib: file: lib.nameValuePair "steel/native/${dylib}" file
-      ) dylibFiles;
-    })
-  ];
+    xdg.configFile = lib.mkIf (installablePlugins != { }) pluginFiles;
+
+    xdg.dataFile = lib.mkIf (installablePlugins != { }) (
+      lib.mapAttrs' (dylib: file: lib.nameValuePair "steel/native/${dylib}" file) dylibFiles
+    );
+  };
 }
