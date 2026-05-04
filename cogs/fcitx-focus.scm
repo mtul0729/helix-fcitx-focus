@@ -1,4 +1,3 @@
-(require "helix/components.scm")
 (require "helix/editor.scm")
 (require "helix/misc.scm")
 (#%require-dylib "libhelix_fcitx_focus"
@@ -37,26 +36,15 @@
         [(and (not (insert-mode? old-mode)) (insert-mode? new-mode))
          (fcitx-restore)]))))
 
-;; Dynamic components receive terminal focus events. This supplements the mode
-;; hook because switching windows does not necessarily change Helix's mode.
-(define (handle-fcitx-focus-event _ event)
-  (cond
-    [(focus-gained-event? event)
-     (close-or-restore-fcitx)
-     event-result/ignore]
-    [(and (focus-lost-event? event) (insert-mode? (editor-mode)))
-     ;; If focus leaves while still in insert mode, remember the active input
-     ;; method but do not close it. The next focus-gained event can restore it.
-     (fcitx-save)
-     event-result/ignore]
-    [else event-result/ignore]))
+;; Terminal focus supplements the mode hook because switching windows does not
+;; necessarily change Helix's mode.
+(register-hook 'terminal-focus-gained
+  (lambda ()
+    (close-or-restore-fcitx)))
 
-;; Reloading init.scm may evaluate this file again. Remove the previous dynamic
-;; component first so focus events do not run the handler multiple times.
-(pop-last-component-by-name! "fcitx-focus")
-(push-component!
-  (new-component!
-    "fcitx-focus"
-    #f
-    #f
-    (hash "handle_event" handle-fcitx-focus-event)))
+(register-hook 'terminal-focus-lost
+  (lambda ()
+    ;; If focus leaves while still in insert mode, remember the active input
+    ;; method but do not close it. The next focus-gained event can restore it.
+    (when (insert-mode? (editor-mode))
+      (fcitx-save))))

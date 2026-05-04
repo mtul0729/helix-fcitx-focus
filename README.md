@@ -88,6 +88,10 @@ This plugin is intended as a real-world example for Steel terminal focus events:
 terminal focus events complement `on-mode-switch`, because changing windows does
 not necessarily change Helix's editor mode.
 
+The focus listener uses Steel's `terminal-focus-gained` and
+`terminal-focus-lost` hooks, so it does not need to create a non-visual dynamic
+component or participate in the compositor stack.
+
 ## License
 
 Licensed under either of Apache License, Version 2.0 or MIT license at your
