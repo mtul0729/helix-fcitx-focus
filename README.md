@@ -1,5 +1,7 @@
 # helix-fcitx-focus
 
+[简体中文](README.zh-CN.md)
+
 Steel plugin for Helix that keeps fcitx5 in English outside insert mode and
 restores the previous active input method when entering insert mode.
 
@@ -81,21 +83,6 @@ cp cogs/fcitx-focus.scm ~/.local/share/steel/cogs/helix-fcitx-focus/cogs/
 - When Helix loses focus, the plugin restores that previous application input
   method state by default.
 - SSH sessions and non-graphical sessions are ignored.
-
-## Notes
-
-The fcitx5 integration is implemented as a Steel native module in Rust. It talks
-to fcitx5 over DBus directly, so the Scheme side only maps Helix mode and focus
-events to a small set of operations: save, close, save-and-close, restore, and
-their external-focus state variants.
-
-This plugin is intended as a real-world example for Steel terminal focus events:
-terminal focus events complement `on-mode-switch`, because changing windows does
-not necessarily change Helix's editor mode.
-
-The focus listener uses Steel's `terminal-focus-gained` and
-`terminal-focus-lost` hooks, so it does not need to create a non-visual dynamic
-component or participate in the compositor stack.
 
 ## License
 
