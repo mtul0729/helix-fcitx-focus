@@ -76,13 +76,18 @@ cp cogs/fcitx-focus.scm ~/.local/share/steel/cogs/helix-fcitx-focus/cogs/
 - Focusing Helix in normal/select mode closes fcitx5.
 - Focusing Helix while it is still in insert mode restores the saved input
   method instead of blindly closing it.
+- When Helix gains focus, the plugin remembers the input method state that was
+  active in the previous application.
+- When Helix loses focus, the plugin restores that previous application input
+  method state by default.
 - SSH sessions and non-graphical sessions are ignored.
 
 ## Notes
 
 The fcitx5 integration is implemented as a Steel native module in Rust. It talks
 to fcitx5 over DBus directly, so the Scheme side only maps Helix mode and focus
-events to four small operations: save, close, save-and-close, and restore.
+events to a small set of operations: save, close, save-and-close, restore, and
+their external-focus state variants.
 
 This plugin is intended as a real-world example for Steel terminal focus events:
 terminal focus events complement `on-mode-switch`, because changing windows does

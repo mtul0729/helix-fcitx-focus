@@ -17,7 +17,8 @@ struct SavedState {
     input_method: Option<String>,
 }
 
-static SAVED_STATE: OnceLock<Mutex<SavedState>> = OnceLock::new();
+static INSERT_STATE: OnceLock<Mutex<SavedState>> = OnceLock::new();
+static EXTERNAL_STATE: OnceLock<Mutex<SavedState>> = OnceLock::new();
 
 declare_module!(create_module);
 
@@ -26,18 +27,28 @@ fn create_module() -> FFIModule {
 
     module
         .register_fn("fcitx-save", fcitx_save)
+        .register_fn("fcitx-save-external", fcitx_save_external)
         .register_fn("fcitx-close", fcitx_close)
         .register_fn("fcitx-save-and-close", fcitx_save_and_close)
-        .register_fn("fcitx-restore", fcitx_restore);
+        .register_fn("fcitx-restore", fcitx_restore)
+        .register_fn("fcitx-restore-external", fcitx_restore_external);
 
     module
 }
 
 fn fcitx_save() {
+    save_state(&INSERT_STATE);
+}
+
+fn fcitx_save_external() {
+    save_state(&EXTERNAL_STATE);
+}
+
+fn save_state(state_store: &'static OnceLock<Mutex<SavedState>>) {
     let _ = with_fcitx_proxy(|proxy| {
         let state = call_state(proxy).unwrap_or_default();
         let input_method = call_current_input_method(proxy).ok();
-        let saved_state = SAVED_STATE.get_or_init(|| Mutex::new(SavedState::default()));
+        let saved_state = state_store.get_or_init(|| Mutex::new(SavedState::default()));
 
         if let Ok(mut saved_state) = saved_state.lock() {
             saved_state.active = state == ACTIVE_STATE;
@@ -58,7 +69,15 @@ fn fcitx_save_and_close() {
 }
 
 fn fcitx_restore() {
-    let saved_state = SAVED_STATE.get_or_init(|| Mutex::new(SavedState::default()));
+    restore_state(&INSERT_STATE);
+}
+
+fn fcitx_restore_external() {
+    restore_state(&EXTERNAL_STATE);
+}
+
+fn restore_state(state_store: &'static OnceLock<Mutex<SavedState>>) {
+    let saved_state = state_store.get_or_init(|| Mutex::new(SavedState::default()));
     let Ok(saved_state) = saved_state.lock() else {
         return;
     };

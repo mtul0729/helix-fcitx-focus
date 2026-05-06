@@ -2,9 +2,16 @@
 (require "helix/misc.scm")
 (#%require-dylib "libhelix_fcitx_focus"
   (only-in fcitx-save
+           fcitx-save-external
            fcitx-close
            fcitx-save-and-close
-           fcitx-restore))
+           fcitx-restore
+           fcitx-restore-external))
+
+;; Restore the input method state that was active before Helix gained focus.
+;; Disable this if you prefer Helix's forced-English state to remain active
+;; after switching away.
+(define restore-external-on-focus-lost? #t)
 
 ;; Cache Helix's insert-mode value once, so later predicates do not depend on
 ;; string comparisons or repeated mode construction.
@@ -40,6 +47,7 @@
 ;; necessarily change Helix's mode.
 (register-hook 'terminal-focus-gained
   (lambda ()
+    (fcitx-save-external)
     (close-or-restore-fcitx)))
 
 (register-hook 'terminal-focus-lost
@@ -47,4 +55,6 @@
     ;; If focus leaves while still in insert mode, remember the active input
     ;; method but do not close it. The next focus-gained event can restore it.
     (when (insert-mode? (editor-mode))
-      (fcitx-save))))
+      (fcitx-save))
+    (when restore-external-on-focus-lost?
+      (fcitx-restore-external))))
